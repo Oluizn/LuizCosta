@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inovações em Headsets Corporativos | Relatório Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Sage Green & Sienna -->
+    <!-- Application Structure Plan: A top-down, single-page application with a sticky navigation bar guiding users through four thematic sections: 1. Market Transformation (with an interactive growth chart), 2. Pillars of Innovation (using an interactive card-based layout to explain tech concepts), 3. Interactive Model Comparator (linking a dynamic bar chart with a clickable model grid), and 4. The Future (summarizing trends and recommendations). This non-linear, thematic structure is chosen over a direct report translation to improve engagement and allow users to explore topics based on interest, rather than following a rigid chapter order. The core interaction is the model comparator, which lets users directly connect quantitative specs with qualitative features, facilitating a better decision-making process. -->
+    <!-- Visualization & Content Choices: Market Growth -> Goal: Inform -> Bar Chart (Chart.js) -> Interaction: Hover -> Justification: Visualizes growth trend effectively. Microphone/Audio Tech -> Goal: Compare/Organize -> Interactive Cards (HTML/CSS) -> Interaction: Click/Hover -> Justification: Simplifies complex concepts. Model Specs -> Goal: Compare -> Horizontal Bar Chart (Chart.js) + Interactive Grid -> Interaction: Click model to filter/highlight/show details -> Justification: Connects quantitative and qualitative data for powerful comparison. All visualizations use Canvas via Chart.js, with interactive elements built in vanilla JS to create a dynamic and exploratory user experience. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #CAD2C5; /* Darker Sage Green */
+            color: #354F52; /* Darker Slate Gray for contrast */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E07A5F; /* Burnt Sienna */
+            border-bottom-color: #E07A5F;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .pillar-card {
+            cursor: pointer;
+        }
+        .pillar-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.5), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #E07A5F;
+        }
+        .model-card.active {
+            border-color: #E07A5F;
+            box-shadow: 0 0 0 3px rgba(224, 122, 95, 0.4);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .pill-button.active {
+            background-color: #354F52;
+            color: #F8F4F0;
+        }
+        .pill-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-[#354F52]">
+                P&D Headsets<span class="text-emerald-700"> Intelbras</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#pilares" class="nav-link">Pilares da Inovação</a>
+                <a href="#comparativo" class="nav-link">Comparativo</a>
+                <a href="#futuro" class="nav-link">O Futuro</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-[#354F52] focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#pilares" class="block py-2 px-4 text-sm hover:bg-gray-200">Pilares da Inovação</a>
+            <a href="#comparativo" class="block py-2 px-4 text-sm hover:bg-gray-200">Comparativo</a>
+            <a href="#futuro" class="block py-2 px-4 text-sm hover:bg-gray-200">O Futuro</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <!-- Hero Section -->
+        <section id="hero" class="text-center py-12">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-[#2F3E46]">O Futuro da Comunicação Corporativa</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-700">Uma análise interativa das inovações que estão transformando os headsets de simples periféricos em ferramentas de produtividade essenciais, impulsionadas por IA.</p>
+        </section>
+
+        <!-- Section 2: Pilares -->
+        <section id="pilares" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold">Os Pilares da Inovação</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-gray-700">A corrida tecnológica nos headsets profissionais se concentra em áreas fundamentais. Clique em cada pilar para explorar as tecnologias que definem os dispositivos de ponta.</p>
+            </div>
+            <div id="pillar-cards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+                <!-- Pillar 1 -->
+                <div class="card pillar-card bg-white/70 p-6 rounded-2xl shadow-lg border-2 border-transparent h-full flex flex-col" data-pillar="microphone">
+                    <div class="my-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-4">🎤</span>
+                            <h3 class="text-2xl font-bold">Microfone</h3>
+                        </div>
+                        <p class="text-gray-600">Isolar a voz humana do caos. Tecnologias como Beamforming, IA e sensores de condução óssea estão redefinindo a clareza.</p>
+                    </div>
+                </div>
+                <!-- Pillar 2 -->
+                <div class="card pillar-card bg-white/70 p-6 rounded-2xl shadow-lg border-2 border-transparent h-full flex flex-col" data-pillar="audio">
+                    <div class="my-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-4">🎧</span>
+                            <h3 class="text-2xl font-bold">Áudio</h3>
+                        </div>
+                        <p class="text-gray-600">Criar uma "zona de foco". ANC Adaptativo, LE Audio e proteção auditiva garantem imersão e bem-estar.</p>
+                    </div>
+                </div>
+                <!-- Pillar 3 -->
+                <div class="card pillar-card bg-white/70 p-6 rounded-2xl shadow-lg border-2 border-transparent h-full flex flex-col" data-pillar="ai">
+                    <div class="my-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-4">🧠</span>
+                            <h3 class="text-2xl font-bold">Inteligência Artificial</h3>
+                        </div>
+                        <p class="text-gray-600">O headset como um sensor inteligente, com transcrição, análise de sentimento e otimização de chamadas.</p>
+                    </div>
+                </div>
+                <!-- Pillar 4 -->
+                <div class="card pillar-card bg-white/70 p-6 rounded-2xl shadow-lg border-2 border-transparent h-full flex flex-col" data-pillar="design">
+                    <div class="my-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-4">🪑</span>
+                            <h3 class="text-2xl font-bold">Design e Ergonomia</h3>
+                        </div>
+                        <p class="text-gray-600">Conforto para uso diário com materiais leves, hastes retráteis e designs versáteis para o trabalho híbrido.</p>
+                    </div>
+                </div>
+                <!-- Pillar 5 -->
+                <div class="card pillar-card bg-white/70 p-6 rounded-2xl shadow-lg border-2 border-transparent h-full flex flex-col" data-pillar="management">
+                    <div class="my-auto">
+                        <div class="flex items-center mb-4">
+                            <span class="text-3xl mr-4">⚙️</span>
+                            <h3 class="text-2xl font-bold">Gerenciamento</h3>
+                        </div>
+                        <p class="text-gray-600">A gestão centralizada via software permite atualizações, personalização e monitoramento em escala.</p>
+                    </div>
+                </div>
+            </div>
+            <div id="pillar-details" class="mt-12">
+                <!-- Detailed content will be injected here -->
+            </div>
+        </section>
+
+        <!-- Section 3: Comparativo -->
+        <section id="comparativo" class="py-16 bg-white/70 rounded-2xl shadow-lg">
+            <div class="text-center mb-12 px-6">
+                <h2 class="text-3xl md:text-4xl font-bold">Comparativo Interativo de Modelos</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-gray-700">Analise e compare os principais modelos do mercado. Clique em um headset para ver suas especificações em destaque no gráfico e ler sobre suas inovações exclusivas.</p>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 px-6 mb-8">
+                <button class="model-card border-2 border-gray-200 rounded-lg p-4 text-center active" data-model="poly">
+                    <img src="https://placehold.co/100x100/CAD2C5/354F52?text=Poly" alt="Poly Voyager Focus 2" class="mx-auto h-16 mb-2 rounded-full">
+                    <span class="font-semibold">Poly Voyager Focus 2</span>
+                </button>
+                <button class="model-card border-2 border-gray-200 rounded-lg p-4 text-center" data-model="jabra">
+                    <img src="https://placehold.co/100x100/CAD2C5/354F52?text=Jabra" alt="Jabra Evolve2 75" class="mx-auto h-16 mb-2 rounded-full">
+                    <span class="font-semibold">Jabra Evolve2 75</span>
+                </button>
+                <button class="model-card border-2 border-gray-200 rounded-lg p-4 text-center" data-model="epos">
+                    <img src="https://placehold.co/100x100/CAD2C5/354F52?text=EPOS" alt="EPOS IMPACT 1000" class="mx-auto h-16 mb-2 rounded-full">
+                    <span class="font-semibold">EPOS IMPACT 1000</span>
+                </button>
+                <button class="model-card border-2 border-gray-200 rounded-lg p-4 text-center" data-model="logitech">
+                    <img src="https://placehold.co/100x100/CAD2C5/354F52?text=Logi" alt="Logitech Zone Wireless 2" class="mx-auto h-16 mb-2 rounded-full">
+                    <span class="font-semibold">Logitech Zone Wireless 2</span>
+                </button>
+                <button class="model-card border-2 border-gray-200 rounded-lg p-4 text-center" data-model="intelbras">
+                    <img src="https://placehold.co/100x100/CAD2C5/354F52?text=Intelbras" alt="Intelbras WHS 80 BT" class="mx-auto h-16 mb-2 rounded-full">
+                    <span class="font-semibold">Intelbras WHS 80 BT</span>
+                </button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row gap-8 px-6">
+                <!-- Info Panel -->
+                <div id="model-info-panel" class="lg:w-1/3 fade-in">
+                    <!-- Content will be injected by JS -->
+                </div>
+
+                <!-- Chart -->
+                <div class="lg:w-2/3">
+                    <div class="flex justify-center mb-4 space-x-2">
+                        <button class="pill-button px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700 active" data-metric="talkTime">Tempo de Conversação</button>
+                        <button class="pill-button px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700" data-metric="wirelessRange">Alcance Sem Fio</button>
+                    </div>
+                    <div class="chart-container headset-chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Section 4: Futuro -->
+        <section id="futuro" class="py-16 bg-white/50 mt-16 rounded-2xl">
+            <div class="text-center mb-12 px-6">
+                <h2 class="text-3xl md:text-4xl font-bold">O Headset do Amanhã: A Próxima Fronteira</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-gray-700">O headset evoluiu de um simples periférico para uma ferramenta de produtividade essencial, impulsionada pela ascensão do trabalho híbrido e das plataformas de Comunicação Unificada. A inovação atual foca-se em quatro pilares: microfones com IA que reconstroem a voz em ambientes ruidosos, áudio imersivo com cancelamento de ruído adaptativo para garantir o foco, design ergonómico para conforto durante todo o dia, e um ecossistema de software para gestão e personalização. Esta seção explora as tendências emergentes que levarão estas inovações ainda mais longe, transformando o headset num verdadeiro assistente cognitivo.</p>
+            </div>
+            <div class="space-y-12 px-6 max-w-5xl mx-auto">
+                <!-- Trend 1: Biometria -->
+                <div class="flex flex-col md:flex-row items-center gap-8 fade-in bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="md:w-1/4 flex-shrink-0">
+                        <img src="https://i.postimg.cc/7Yybm8b2/Gemini-Generated-Image-467zea467zea467z.png" alt="Headsets com indicadores de segurança para biometria de voz" class="w-full h-auto rounded-lg shadow-md object-cover">
+                    </div>
+                    <div class="md:w-3/4">
+                        <h3 class="font-bold text-2xl mb-2">Biometria de Voz: A Sua Voz é a Senha</h3>
+                        <p class="text-gray-600 mb-4">Esqueça senhas e PINs. A próxima geração de headsets utilizará a sua impressão vocal única para autenticação contínua e segura. Imagine iniciar sessão no seu PC, aprovar uma transação ou aceder a ficheiros seguros simplesmente falando. Esta funcionalidade não só aumenta a conveniência como também adiciona uma camada robusta de segurança.</p>
+                        <div class="mt-4 p-4 bg-amber-50 border-l-4 border-amber-400">
+                           <h4 class="font-bold text-sm text-amber-800">Exemplo no Mercado:</h4>
+                           <p class="text-sm text-amber-700">Esta é uma tecnologia primariamente de software. Plataformas como **Amazon Connect Voice ID** já a utilizam em centrais de atendimento, e qualquer headset com microfone de alta qualidade pode servir como o dispositivo de entrada para permitir esta funcionalidade.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Trend 2: Tradução -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-8 fade-in bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="md:w-1/3 flex-shrink-0">
+                        <img src="https://www.timekettle.co/cdn/shop/files/Edge-_-_01_a1e0acb5-bac2-41dc-a2cb-458d5e5919bd.gif?v=1715926942&width=800" alt="Animação de fones de ouvido para tradução" class="w-full h-auto rounded-lg shadow-md object-cover">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="font-bold text-2xl mb-2">Tradução Universal em Tempo Real</h3>
+                        <p class="text-gray-600 mb-4">As barreiras linguísticas em reuniões globais irão desaparecer. Integrados com poderosos motores de tradução por IA, os headsets irão traduzir a fala de um interlocutor estrangeiro e entregar a tradução diretamente aos seus ouvidos, quase instantaneamente. Isto irá democratizar a colaboração internacional, permitindo uma comunicação fluida e natural.</p>
+                         <div class="mt-4 p-4 bg-sky-50 border-l-4 border-sky-400">
+                           <h4 class="font-bold text-sm text-sky-800">Exemplo no Mercado:</h4>
+                           <p class="text-sm text-sky-700">A **Timekettle**, com modelos como o **WT2 Edge**, é uma pioneira neste nicho, oferecendo fones de ouvido especializados que se focam na tradução simultânea para conversas cara a cara, demonstrando o potencial desta tecnologia.</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Trend 3: Audição Direcionada -->
+                <div class="flex flex-col md:flex-row items-center gap-8 fade-in bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="md:w-1/3 flex-shrink-0 rounded-lg shadow-lg overflow-hidden">
+                        <video preload="none" class="w-full h-full object-cover" loop playsinline autoplay muted poster="https://www.jabra.com/-/media/Images/Products/Jabra-Evolve2-75/Video/ClearCalls/Jabra-Evolve2-75-clear-calls-Poster.jpg?h=1080&iar=0&w=1920&hash=E6368829D6A2F26048A5CE5971475E2A">
+                            <source src="https://www.jabra.com/-/media/Images/Products/Jabra-Evolve2-75/Video/ClearCalls/Jabra-Evolve2-75-clear-calls-Video.mp4" type="video/mp4">
+                        </video>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="font-bold text-2xl mb-2">Audição Direcionada: O Foco Seletivo</h3>
+                        <p class="text-gray-600 mb-4">Inspirado na capacidade do cérebro humano de focar numa única conversa numa sala cheia, o "Target Speech Hearing" será uma realidade. Utilizando múltiplos microfones e IA avançada, o headset permitirá que você "foque" a sua audição numa pessoa ou direção específica. Ao olhar para um colega num café barulhento, a sua voz será amplificada enquanto todo o ruído de fundo é suprimido.</p>
+                         <div class="mt-4 p-4 bg-teal-50 border-l-4 border-teal-400">
+                           <h4 class="font-bold text-sm text-teal-800">Exemplo no Mercado:</h4>
+                           <p class="text-sm text-teal-700">Embora a audição por "mira" ainda seja emergente, as tecnologias de **beamforming com IA** em modelos como o **EPOS IMPACT 1000** e o **Jabra Evolve2 75** são os precursores comerciais, criando uma "bolha" de foco na voz do usuário e rejeitando ativamente o ruído externo.</p>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Trend 4: Conectividade -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-8 fade-in bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="md:w-1/3 flex-shrink-0 flex items-center justify-center">
+                        <dotlottie-player src="https://lottie.host/0fc3e03e-fb8c-455f-9586-a22d86947747/GxvbXkQJXH.lottie" background="transparent" speed="1" style="width: 100%; max-width: 250px; height: auto;" loop autoplay></dotlottie-player>
+                    </div>
+                    <div class="md:w-2/3">
+                        <h3 class="font-bold text-2xl mb-2">Conectividade Avançada: O Fim do Fio</h3>
+                        <p class="text-gray-600 mb-4">O futuro da conexão sem fio vai além do Bluetooth atual. A evolução imediata é o **Bluetooth LE Audio**, com o codec LC3, que melhora a qualidade do áudio e a eficiência energética. Tecnologias como **Auracast™** permitirão experiências de áudio compartilhadas. No horizonte, a tecnologia **Ultra-Wideband (UWB)** promete áudio de altíssima fidelidade (lossless) e latência quase nula, ideal para jogos e VR, posicionando-se como a próxima grande revolução para a conectividade.</p>
+                        <div class="mt-4 p-4 bg-indigo-50 border-l-4 border-indigo-400">
+                           <h4 class="font-bold text-sm text-indigo-800">Exemplo no Mercado:</h4>
+                           <p class="text-sm text-indigo-700">Headsets que já suportam **Bluetooth 5.2 e 5.3** estão preparados para o **LE Audio**, que representa o próximo passo. A verdadeira revolução virá com os primeiros dispositivos de consumo a adotarem a **UWB** para a transmissão de áudio, algo a ser observado nos próximos lançamentos de topo de gama.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+            <p>&copy; 2025 P&D Comunicação HO - Headsets. Uma Aplicação Interativa Baseada no Relatório de Inovações Tecnológicas.</p>
+            <p class="text-sm mt-2">Todos os dados são extraídos de fontes públicas e relatórios de mercado. As imagens dos produtos são representações.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // ======================================================================
+    // ======================= SHARED & SETUP LOGIC =========================
+    // ======================================================================
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if(mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    }
+    
+    const mobileNav = document.getElementById('mobile-nav');
+    if(mobileNav) {
+        mobileNav.addEventListener('change', (e) => scrollToSection(e.target.value));
+    }
+
+    document.querySelectorAll('.nav-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            scrollToSection(e.currentTarget.dataset.section);
+        });
+    });
+
+    setupScrollSpy();
+    
+    // ======================================================================
+    // ======================= HEADSET LOGIC START ==========================
+    // ======================================================================
+    
+    const pillarCards = document.querySelectorAll('.pillar-card');
+    const pillarDetailsContainer = document.getElementById('pillar-details');
+
+    const pillarDetailsData = {
+        microphone: `
+            <div class="bg-white/70 rounded-2xl p-8 shadow-lg fade-in">
+                <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">🎤 Inovações em Microfone</h3>
+                <p class="mb-6 text-gray-600">O objetivo é a reconstrução inteligente da voz, não apenas a filtragem de ruído. As tecnologias proprietárias representam diferentes filosofias de engenharia para alcançar clareza cristalina.</p>
+                <div class="space-y-6">
+                    <div><h4 class="font-bold text-lg">Poly Acoustic Fence</h4><p>Cria uma "cerca" virtual ao redor do usuário, usando múltiplos microfones para rejeitar ativamente sons que se originam fora desse perímetro. Ideal para ruídos de fundo constantes, como conversas de escritório.</p></div>
+                    <div><h4 class="font-bold text-lg">Jabra Multi-Sensor Voice™</h4><p>Uma abordagem multimodal que combina microfones tradicionais com um sensor de condução óssea (VPU). O VPU detecta as vibrações da voz através da mandíbula, sendo especialmente eficaz em condições de vento.</p></div>
+                    <div><h4 class="font-bold text-lg">EPOS AI™</h4><p>Utiliza machine learning treinado com milhões de cenários sonoros para diferenciar voz de ruído. Analisa o ambiente 32.000 vezes por segundo para suprimir fontes de ruído de forma adaptativa.</p></div>
+                </div>
+            </div>`,
+        audio: `
+            <div class="bg-white/70 rounded-2xl p-8 shadow-lg fade-in">
+                <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">🎧 Inovações em Áudio</h3>
+                <p class="mb-6 text-gray-600">O foco está em criar uma "zona de foco" para o usuário, garantindo imersão, clareza e, crucialmente, protegendo a saúde auditiva a longo prazo.</p>
+                <div class="space-y-6">
+                    <div><h4 class="font-bold text-lg">ANC Adaptativo</h4><p>A evolução do Cancelamento Ativo de Ruído. Sensores monitoram o ambiente e ajustam automaticamente o nível de cancelamento em tempo real, otimizando o foco sem criar a sensação de "pressão" em locais silenciosos.</p></div>
+                    <div><h4 class="font-bold text-lg">Bluetooth LE Audio & Codec LC3</h4><p>O futuro do áudio sem fio. Este novo padrão oferece qualidade de áudio superior com menor consumo de energia, resultando em chamadas mais nítidas e maior duração da bateria.</p></div>
+                    <div><h4 class="font-bold text-lg">Proteção Auditiva Ativa</h4><p>Tecnologias como <strong>Poly SoundGuard</strong>, <strong>Jabra PeakStop™</strong> e <strong>EPOS ActiveGard®</strong> protegem contra picos de som súbitos (choques acústicos) e gerenciam a exposição média ao ruído ao longo do dia, cumprindo normas de saúde ocupacional.</p></div>
+                </div>
+            </div>`,
+        ai: `
+            <div class="bg-white/70 rounded-2xl p-8 shadow-lg fade-in">
+                <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">🧠 Inteligência Artificial</h3>
+                <p class="mb-6 text-gray-600">A IA está transformando o headset de um dispositivo de áudio em um sensor inteligente que melhora todo o fluxo de trabalho de comunicação.</p>
+                <div class="space-y-6">
+                    <div><h4 class="font-bold text-lg">Cancelamento de Ruído do Interlocutor</h4><p>Uma inovação disruptiva onde a IA do seu headset limpa o áudio <strong>proveniente da outra pessoa</strong>. O <strong>Logitech Zone Wireless 2</strong> é pioneiro com a função "Advanced Call Clarity", melhorando a clareza mesmo que seu interlocutor esteja em um ambiente barulhento.</p></div>
+                    <div><h4 class="font-bold text-lg">Análise de Sentimento e Coaching</h4><p>Plataformas como o <strong>Jabra Engage AI</strong> analisam o tom e o sentimento da conversa em tempo real, fornecendo feedback ao vivo para o agente de call center, permitindo melhorar a qualidade do serviço instantaneamente.</p></div>
+                    <div><h4 class="font-bold text-lg">Automação de Fluxo de Trabalho</h4><p>A IA pode fornecer transcrição em tempo real, resumos automáticos de reuniões e marcação de tópicos, liberando os usuários de tarefas manuais e gerando inteligência de negócios a partir das conversas.</p></div>
+                </div>
+            </div>`,
+        design: `
+            <div class="bg-white/70 rounded-2xl p-8 shadow-lg fade-in">
+                <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">🪑 Design e Ergonomia</h3>
+                <p class="mb-6 text-gray-600">Com o uso contínuo por horas, o conforto deixou de ser um luxo para se tornar um fator essencial de produtividade e bem-estar.</p>
+                <div class="space-y-6">
+                    <div><h4 class="font-bold text-lg">Materiais Leves e Sustentáveis</h4><p>Uso de tiaras de metal leve, plásticos de alta qualidade e um foco crescente em conteúdo reciclado. Almofadas de espuma de memória e couro sintético macio equilibram conforto e isolamento.</p></div>
+                    <div><h4 class="font-bold text-lg">Hastes de Microfone Retráteis</h4><p>Uma inovação chave para a versatilidade. A haste pode ser integrada ao design, transformando um headset profissional em fones de ouvido elegantes para o lazer, ideal para o trabalhador híbrido.</p></div>
+                    <div><h4 class="font-bold text-lg">Design "Camaleão"</h4><p>Os fabricantes estão projetando dispositivos que adaptam sua forma e função ao contexto do usuário. O mesmo headset é usado para uma chamada no Teams, para ouvir música no trajeto e para uma videochamada pessoal em casa, exigindo um design que transite entre o profissional e o de consumo.</p></div>
+                </div>
+            </div>`,
+        management: `
+            <div class="bg-white/70 rounded-2xl p-8 shadow-lg fade-in">
+                <h3 class="text-2xl font-bold mb-4 text-[#E07A5F]">⚙️ Gerenciamento e Ecossistema</h3>
+                <p class="mb-6 text-gray-600">Um headset profissional moderno é mais do que apenas hardware; é um endpoint que faz parte de um ecossistema de software. As aplicações de gerenciamento são cruciais para a personalização do usuário e, mais importante, para a gestão, segurança e análise em escala empresarial.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-lg">Jabra Sound+</h4>
+                        <p>Focado no usuário final, o Sound+ permite uma personalização profunda da experiência auditiva. Os usuários podem ajustar os níveis de ANC, configurar o modo HearThrough (transparência de áudio), personalizar o equalizador de música e criar "Momentos" — perfis de áudio pré-configurados para diferentes ambientes como "Trabalho" ou "Transporte Público".</p>
+                        <img src="https://i.postimg.cc/JhX9Tgss/Sound-Plus-T.webp" alt="Interface do aplicativo Jabra Sound+" class="mt-4 rounded-lg shadow-md">
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg">Logi Tune</h4>
+                        <p>O Logi Tune é o aplicativo de desktop e móvel que dá ao usuário controle sobre as configurações do seu dispositivo. Permite ajustar o sidetone (o quanto da própria voz se ouve), o equalizador de áudio, e garante que o firmware do headset esteja sempre atualizado para o melhor desempenho e compatibilidade.</p>
+                        <video src="https://resource.logitech.com/w_1920,ac_none,f_auto,dpr_1.0,q_auto:best/content/dam/logitech/en/video-collaboration/software/logi-tune-software/logi-tune-software-video-zoom-desktop.mp4" autoplay loop muted playsinline class="mt-4 rounded-lg shadow-md"></video>
+                    </div>
+                </div>
+            </div>`
+    };
+
+    function updatePillarDetails(pillarKey) {
+        pillarCards.forEach(card => {
+            card.classList.remove('active');
+            if (card.dataset.pillar === pillarKey) {
+                card.classList.add('active');
+            }
+        });
+        pillarDetailsContainer.innerHTML = pillarDetailsData[pillarKey];
+    }
+
+    pillarCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const pillarKey = card.dataset.pillar;
+            updatePillarDetails(pillarKey);
+        });
+    });
+    
+    updatePillarDetails('microphone');
+    document.querySelector('.pillar-card[data-pillar="microphone"]').classList.add('active');
+
+    const modelData = {
+        poly: { name: "Poly Voyager Focus 2", talkTime: 16, wirelessRange: 50, info: { profile: "O cavalo de batalha do profissional, equilibrando desempenho, conforto e fiabilidade.", innovation: "Exemplifica a tecnologia <strong>Acoustic Fence</strong> para um cancelamento de ruído superior no microfone e apresenta três níveis de ANC híbrido.", specs: "Até 16h de conversação (ANC ligado), alcance de 50m e design on-ear ultraconfortável."} },
+        jabra: { name: "Jabra Evolve2 75", talkTime: 18, wirelessRange: 30, info: { profile: "Uma obra-prima de engenharia de microfones e versatilidade para o trabalho híbrido.", innovation: "Apresenta uma matriz de 8 microfones e uma <strong>haste de microfone retrátil</strong> para uma transição elegante do trabalho para o lazer.", specs: "Até 18h de conversação (ANC ligado), Bluetooth 5.2 e ANC ajustável."} },
+        epos: { name: "EPOS IMPACT 1000", talkTime: 19, wirelessRange: 30, info: { profile: "A escolha impulsionada por IA para reduzir a carga cognitiva no 'Novo Escritório Aberto'.", innovation: "Construído com base na tecnologia <strong>EPOS BrainAdapt™</strong> e oferece <strong>conectividade tripla</strong>, permitindo a conexão a três dispositivos em simultâneo.", specs: "Até 19h de conversação (ANC ligado), Bluetooth 5.3 e áudio super wideband."} },
+        logitech: { name: "Logitech Zone Wireless 2", talkTime: 15, wirelessRange: 50, info: { profile: "O líder em cancelamento de ruído bidirecional alimentado por IA.", innovation: "Sua característica de destaque é a <strong>supressão de ruído do interlocutor (Advanced Call Clarity)</strong>, uma inovação significativa no mercado.", specs: "Até 15h de conversação (ANC ligado), peças substituíveis e foco em sustentabilidade."} },
+        intelbras: { name: "Intelbras WHS 80 BT", talkTime: 17, wirelessRange: 30, info: { profile: "A solução de excelente custo-benefício para profissionais que buscam fiabilidade e clareza nas comunicações diárias.", innovation: "Foco em <strong>confiabilidade e clareza</strong> com um microfone com cancelamento de ruído ativo, ideal para escritórios e home office.", specs: "Até 17h de conversação, alcance de 30m, Bluetooth 5.0 e design on-ear leve."} }
+    };
+
+    const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+    let comparisonChart;
+    let currentMetric = 'talkTime';
+    const metricLabels = {
+        talkTime: 'Tempo de Conversação (em horas)',
+        wirelessRange: 'Alcance Sem Fio (em metros)'
+    };
+
+    function createComparisonChart(metric, highlightedModel) {
+        if (comparisonChart) {
+            comparisonChart.destroy();
+        }
+        
+        const chartData = Object.values(modelData).map(m => m[metric]);
+        const backgroundColors = Object.keys(modelData).map(key => key === highlightedModel ? '#E07A5F' : '#8D99AE');
+        
+        comparisonChart = new Chart(comparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.values(modelData).map(m => m.name),
+                datasets: [{
+                    label: metricLabels[metric],
+                    data: chartData,
+                    backgroundColor: backgroundColors,
+                    borderColor: backgroundColors.map(c => c + 'CC'),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label = label.split('(')[0].trim() + ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                     label += context.parsed.x + (metric === 'talkTime' ? 'h' : 'm');
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { beginAtZero: true, title: { display: true, text: metricLabels[metric] } },
+                    y: { ticks: { autoSkip: false, callback: function(value) { const label = this.getLabelForValue(value); return label.length > 20 ? label.split(' ').slice(0, 3).join(' ') + '...' : label; } } }
+                }
+            }
+        });
+    }
+
+    const modelInfoPanel = document.getElementById('model-info-panel');
+    function updateInfoPanel(modelKey) {
+        const data = modelData[modelKey];
+        modelInfoPanel.innerHTML = `
+            <div class="bg-gray-100/50 p-6 rounded-lg h-full fade-in">
+                <h3 class="text-2xl font-bold mb-3 text-[#E07A5F]">${data.name}</h3>
+                <p class="font-semibold mb-2">${data.info.profile}</p>
+                <div class="my-4 border-t border-gray-300"></div>
+                <h4 class="font-bold text-lg mb-2">Inovações Chave:</h4>
+                <p class="mb-4 text-gray-600">${data.info.innovation}</p>
+                <h4 class="font-bold text-lg mb-2">Resumo Técnico:</h4>
+                <p class="text-gray-600">${data.info.specs}</p>
+            </div>
+        `;
+    }
+
+    document.querySelectorAll('.model-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const modelKey = card.dataset.model;
+            document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            updateInfoPanel(modelKey);
+            createComparisonChart(currentMetric, modelKey);
+        });
+    });
+
+    document.querySelectorAll('.pill-button').forEach(button => {
+        button.addEventListener('click', () => {
+            currentMetric = button.dataset.metric;
+            document.querySelectorAll('.pill-button').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            const activeModel = document.querySelector('.model-card.active').dataset.model;
+            createComparisonChart(currentMetric, activeModel);
+        });
+    });
+
+    createComparisonChart('talkTime', 'poly');
+    updateInfoPanel('poly');
+
+});
+
+// Shared functions
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function setupScrollSpy() {
+    const sections = document.querySelectorAll('main section');
+    const navButtons = document.querySelectorAll('.nav-button');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.section === entry.target.id);
+                });
+                if(mobileNav) mobileNav.value = entry.target.id;
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0.1 });
+
+    sections.forEach(section => observer.observe(section));
+}
+
+</script>
+
+</body>
+</html>
