@@ -1,5 +1,4 @@
-
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
@@ -108,7 +107,7 @@
 
         <!-- Hero Section -->
         <section id="hero" class="text-center py-12">
-            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-[#2F3E46]">O Futuro da Comunicação Corporativa</h1>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-[#2F3E46]">Avanços tecnológicos com foco em headsets</h1>
             <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-700">Uma análise interativa das inovações que estão transformando os headsets de simples periféricos em ferramentas de produtividade essenciais, impulsionadas por IA.</p>
         </section>
 
@@ -322,9 +321,10 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileNav.addEventListener('change', (e) => scrollToSection(e.target.value));
     }
 
-    document.querySelectorAll('.nav-button').forEach(button => {
+    document.querySelectorAll('.nav-link').forEach(button => {
         button.addEventListener('click', (e) => {
-            scrollToSection(e.currentTarget.dataset.section);
+            e.preventDefault();
+            scrollToSection(e.currentTarget.getAttribute('href').substring(1));
         });
     });
 
@@ -344,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="mb-6 text-gray-600">O objetivo é a reconstrução inteligente da voz, não apenas a filtragem de ruído. As tecnologias proprietárias representam diferentes filosofias de engenharia para alcançar clareza cristalina.</p>
                 <div class="space-y-6">
                     <div><h4 class="font-bold text-lg">Poly Acoustic Fence</h4><p>Cria uma "cerca" virtual ao redor do usuário, usando múltiplos microfones para rejeitar ativamente sons que se originam fora desse perímetro. Ideal para ruídos de fundo constantes, como conversas de escritório.</p></div>
-                    <div><h4 class="font-bold text-lg">Jabra Multi-Sensor Voice™</h4><p>Uma abordagem multimodal que combina microfones tradicionais com um sensor de condução óssea (VPU). O VPU detecta as vibrações da voz através da mandíbula, sendo especialmente eficaz em condições de vento.</p></div>
                     <div><h4 class="font-bold text-lg">EPOS AI™</h4><p>Utiliza machine learning treinado com milhões de cenários sonoros para diferenciar voz de ruído. Analisa o ambiente 32.000 vezes por segundo para suprimir fontes de ruído de forma adaptativa.</p></div>
                 </div>
             </div>`,
@@ -364,7 +363,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p class="mb-6 text-gray-600">A IA está transformando o headset de um dispositivo de áudio em um sensor inteligente que melhora todo o fluxo de trabalho de comunicação.</p>
                 <div class="space-y-6">
                     <div><h4 class="font-bold text-lg">Cancelamento de Ruído do Interlocutor</h4><p>Uma inovação disruptiva onde a IA do seu headset limpa o áudio <strong>proveniente da outra pessoa</strong>. O <strong>Logitech Zone Wireless 2</strong> é pioneiro com a função "Advanced Call Clarity", melhorando a clareza mesmo que seu interlocutor esteja em um ambiente barulhento.</p></div>
-                    <div><h4 class="font-bold text-lg">Análise de Sentimento e Coaching</h4><p>Plataformas como o <strong>Jabra Engage AI</strong> analisam o tom e o sentimento da conversa em tempo real, fornecendo feedback ao vivo para o agente de call center, permitindo melhorar a qualidade do serviço instantaneamente.</p></div>
+                    <div>
+                        <h4 class="font-bold text-lg">Análise de Sentimento e Coaching</h4>
+                        <p>Plataformas como o <strong>Jabra Engage AI</strong> analisam o tom e o sentimento da conversa em tempo real, fornecendo feedback ao vivo para o agente de call center, permitindo melhorar a qualidade do serviço instantaneamente.</p>
+                        <video class="mt-4 rounded-lg shadow-md" poster="https://www.jabra.com.br/-/media/Images/Products/Jabra-Engage-AI/2025/Reat-Time-Coaching/Jabra-Realtime-base-Cover-image.jpg" preload="none" muted="true" playsinline="true" loop="true" autoplay="true" controls>
+                            <source src="https://www.jabra.com/-/media/Images/Products/Jabra-Engage-AI/2025/Reat-Time-Coaching/Jabra-Real-time-base-020525.mp4" type="video/mp4">
+                        </video>
+                    </div>
                     <div><h4 class="font-bold text-lg">Automação de Fluxo de Trabalho</h4><p>A IA pode fornecer transcrição em tempo real, resumos automáticos de reuniões e marcação de tópicos, liberando os usuários de tarefas manuais e gerando inteligência de negócios a partir das conversas.</p></div>
                 </div>
             </div>`,
@@ -533,14 +538,14 @@ function scrollToSection(sectionId) {
 
 function setupScrollSpy() {
     const sections = document.querySelectorAll('main section');
-    const navButtons = document.querySelectorAll('.nav-button');
+    const navButtons = document.querySelectorAll('.nav-link');
     const mobileNav = document.getElementById('mobile-nav');
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 navButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.section === entry.target.id);
+                    btn.classList.toggle('active', btn.getAttribute('href') === `#${entry.target.id}`);
                 });
                 if(mobileNav) mobileNav.value = entry.target.id;
             }
